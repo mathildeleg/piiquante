@@ -1,13 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cryptoJS = require('crypto-js');
+const validator = require('validator');
 
 const User = require('../models/user'); 
 
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
+    if(validator.isEmail(req.body.email, {blacklisted_chars: '$="'})){
+        bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
-                email: req.body.email,
+                email: cryptoJS.MD5(req.body.email).toString(),
                 password: hash
             });
         user.save()
@@ -15,10 +18,15 @@ exports.signup = (req, res, next) => {
             .catch(error => res.status(500).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
+    }else{
+        res.status(400).json({error: "Le format de l'adresse e-mail n'est pas valide"});
+    }
+    
 };
 
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email })
+    let cryptedEmail = cryptoJS.MD5(req.body.mail).toString();
+    User.findOne({ email: cryptedEmail })
         .then(user => {
             if(!user) {
                 return res.status(401).json({ error: 'Utilisateur non trouvé !' })
