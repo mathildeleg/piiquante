@@ -74,22 +74,19 @@ exports.likeSauce = async (req, res, next) => {
   const like = req.body.like;
   const userId = req.body.userId;
   const sauceId = req.params.id;
+  await removeLikeOrDislike(userId, sauceId);
   if (like === 1) {
-    await removeLikeOrDislike(userId, sauceId);
     try {
       await Sauce.updateOne({ _id: sauceId }, { $push: { usersLiked: userId }, $inc: { likes: 1 } })
     } catch (error) {
       return res.status(400).json({ error });
     }
   } else if (like === -1) {
-    await removeLikeOrDislike(userId, sauceId);
     try {
       await Sauce.updateOne({ _id: sauceId }, { $push: { usersDisliked: userId }, $inc: { dislikes: 1 } })
     } catch (error) {
       return res.status(400).json({ error });
     }
-  } else {
-    await removeLikeOrDislike(userId, sauceId);
   }
   return res.status(200).json({message: "L'utilisateur a aimé ou disliké une sauce"});
 }
