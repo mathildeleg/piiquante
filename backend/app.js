@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
+const helmet = require('helmet');
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
@@ -14,6 +15,8 @@ mongoose.connect('mongodb+srv://newuser4:mongodb4user@cluster0.f2e9r.mongodb.net
 mongoose.set('useCreateIndex', true);
 
 const app = express();
+
+app.use(helmet());
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
