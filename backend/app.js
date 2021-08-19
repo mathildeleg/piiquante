@@ -4,11 +4,12 @@ const mongoose = require('mongoose');
 const path = require('path');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
+require('dotenv/config');
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb+srv://newuser4:mongodb4user@cluster0.f2e9r.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+mongoose.connect(process.env.DB_CONNECTION,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
