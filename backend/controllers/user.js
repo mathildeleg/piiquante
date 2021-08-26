@@ -1,14 +1,30 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
+const passwordValidator = require('password-validator');
 
 const User = require('../models/user');
 
+const schema = new passwordValidator();
+schema
+    .is().min(8)                                    // Minimum length 8
+    .is().max(100)                                  // Maximum length 100
+    .has().uppercase()                              // Must have uppercase letters
+    .has().lowercase()                              // Must have lowercase letters
+    .has().digits(2)                                // Must have at least 2 digits
+    .has().not().spaces()                           // Should not have spaces
+    .is().not().oneOf(['Passw0rd', 'Password123']); // Blacklist these values
+
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
+    const password = req.body.password;
+    const email = req.body.email;
+    if(!schema.validate(password)){
+        return res.status(401).json({ error: 'Mot de passe non valide !' })
+    }
+    bcrypt.hash(password, 10)
         .then(hash => {
             const user = new User({
-                email: CryptoJS.MD5(req.body.email).toString(),
+                email: CryptoJS.MD5(email).toString(),
                 password: hash
             });
             user.save()
