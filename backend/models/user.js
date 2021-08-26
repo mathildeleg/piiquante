@@ -1,3 +1,4 @@
+// create schema for one user, making sure user is unique
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
