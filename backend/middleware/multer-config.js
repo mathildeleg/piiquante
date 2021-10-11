@@ -14,9 +14,17 @@ const storage = multer.diskStorage({
     },
     // name of the image file with a timestamp and proper image type
     filename: (req, file, callback) => {
-        const name = file.originalname.split(' ').join('_');
-        const extension = MIME_TYPES[file.mimetype];
-        callback(null, name + Date.now() + '.' + extension);
+        // if image name doesn't have "jpg" ou "png", then add it at the end + the current date
+        if (file.originalname !== 'jpg' || file.originalname !== 'png'){
+            const name = file.originalname.split(' ').join('_');
+            const extension = MIME_TYPES[file.mimetype];
+            callback(null, name + Date.now() + '.' + extension);
+        }
+        // else, only remove the empty spaces but don't add the type
+        else {
+            const name = file.originalname.split(' ').join('_');
+            callback(null, name);
+        }
     }
 });
 
