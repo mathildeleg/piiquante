@@ -1,5 +1,6 @@
 const Sauce = require('../models/sauce');
 const fs = require('fs');
+const sauce = require('../models/sauce');
 
 // route to create a sauce
 exports.createSauce = (req, res, next) => {
@@ -22,28 +23,46 @@ exports.createSauce = (req, res, next) => {
 
 // route to modify sauce by getting the sauce you want to modify and then modifying it
 exports.modifySauce = (req, res, next) => {
+  // modify imageUrl if the image is changed
   const sauceObject = req.file ?
     {
       ...JSON.parse(req.body.sauce),
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     } : { ...req.body };
+  // get user id of the user who added the sauce
+  Sauce.findOne({ _id: req.params.id })
+  .then(sauce => {
+    const userId = sauce.userId
+  // only allow correct user to update the sauce
+    if(userId === req.userId){
+      Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+      .then(() => { res.status(201).json({ message: 'Sauce modifiée !' }) })
+      .catch(error => res.status(400).json({ error }));
+    } else {
+      res.status(401).json({error: error | "Unauthorised"});
+    }
+  })
   // update sauce
-  Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => { res.status(201).json({ message: 'Sauce modifiée !' }) })
-    .catch(error => res.status(400).json({ error }));
+  
 };
 
 // route to delete sauce by getting the sauce you want to delete and then deleting it and its image
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(sauce => {
+      // find user id
+      const userId = sauce.userId;
       // delete image
       const filename = sauce.imageUrl.split('/images/')[1];
       fs.unlink(`images/${filename}`, () => {
-        // delete sauce
-        Sauce.deleteOne({ _id: req.params.id })
+        // delete sauce only if user is the one who added the sauce
+        if(userId === req.userId){
+          Sauce.deleteOne({ _id: req.params.id })
           .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
           .catch(error => res.status(400).json({ error }));
+        } else {
+          res.status(401).json({error: error | "Unauthorised"});
+        }
       });
     })
     .catch(error => res.status(500).json({ error }));
