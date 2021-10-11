@@ -39,7 +39,7 @@ exports.modifySauce = (req, res, next) => {
       .then(() => { res.status(201).json({ message: 'Sauce modifiée !' }) })
       .catch(error => res.status(400).json({ error }));
     } else {
-      res.status(401).json({error: error | "Unauthorised"});
+      res.status(403).json({error: error | "Unauthorised request"});
     }
   })
   // update sauce
@@ -61,7 +61,7 @@ exports.deleteSauce = (req, res, next) => {
           .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
           .catch(error => res.status(400).json({ error }));
         } else {
-          res.status(401).json({error: error | "Unauthorised"});
+          res.status(403).json({error: error | "Unauthorised request"});
         }
       });
     })
